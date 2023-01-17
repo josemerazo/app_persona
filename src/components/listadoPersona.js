@@ -1,55 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import Container from 'react-bootstrap/Container';
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import ListadoPersona from "./components/listadoPersona";
-import Bienvenido from "./components/bienvenido";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <ListadoPersona></ListadoPersona>,
-  },
-  {
-    path: "/bienvenido",
-    element: <Bienvenido/>,
-  },
-]);
-
-function App (){
-
-return(
-  <React.StrictMode>
-
-<Navbar bg="dark" variant="dark">
-        <Container>
-          <Navbar.Brand href="#home">Navbar</Navbar.Brand>
-          <Nav className="me-auto">
-            <Nav.Link href={"/"}>Home</Nav.Link>
-            <Nav.Link href={"/bienvenido"}>Features</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-          </Nav>
-        </Container>
-      </Navbar>
-      <RouterProvider router={router}/>
-      </React.StrictMode>
-      );
-}
-
-export default App;
-
-
-
-
-
-
-/*import logo from './logo.svg';
-import './App.css';
+import logo from '../logo.svg';
+import '../App.css';
 import axios from "axios";
 import { useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
@@ -58,18 +8,14 @@ import Row from 'react-bootstrap/Row';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
-import { ModalPersona } from './components/modalPersona';
-import { FaEdit } from 'react-icons/fa';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { ModalPersona } from '../components/modalPersona';
+
+import Modal from 'react-bootstrap/Modal';
 //////////////////SE AGREGA LA FUNCION EDITAR, CARGANDO DINAMICAMENTE LOS VALORES 
 
-function App() {
+function ListadoPersona() {
   const [data, setData] = useState([]);
+  const [showModalEliminar, setShowModalEliminar] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [idPersona, SetIdPersona] = useState(0);
 
@@ -86,13 +32,22 @@ function App() {
   }
 
   const editar = (e) => {
+    console.log(e.target)
     SetIdPersona(e.target.getAttribute("idpersona"))
     setMostrarModal(true)
+  }
+
+
+  const eliminar = async (e) => {
+    await axios.delete(`http://apitest.beatlech.com/public/api/persona/${idPersona}`);
+    setShowModalEliminar(false)
+    fetchDataPersona();
   }
 
   useEffect(() => {
     fetchDataPersona();
   }, [])
+
 
   return (
     <>
@@ -102,18 +57,30 @@ function App() {
           setMostrarModal(false);
           fetchDataPersona();
         }}></ModalPersona>
+
+      <Modal show={showModalEliminar} onHide={() => setShowModalEliminar(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Eliminar Registro</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿Está seguro que desea eliminar el registro seleccionado?
+          IdPersona= {idPersona}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => {
+            setShowModalEliminar(false)
+            SetIdPersona(0)
+          }}>
+            Cerrar
+          </Button>
+          <Button variant="danger" onClick={eliminar}>
+            Eliminar
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Container>
-      <Navbar bg="dark" variant="dark">
-        <Container>
-          <Navbar.Brand href="#home">Navbar</Navbar.Brand>
-          <Nav className="me-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#features">Features</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-          </Nav>
-        </Container>
-      </Navbar>
-      <br />
+
+        <br />
         <Row>
           <Col xs={2}><img width="75" src={logo}></img></Col>
           <Col><h1>Consulta de personas</h1></Col>
@@ -139,6 +106,12 @@ function App() {
                         <Button variant="primary"
                           idpersona={item.id}
                           onClick={editar}>Editar</Button>
+                        <Button variant="danger"
+                          idpersona={item.id}
+                          onClick={() => {
+                            SetIdPersona(item.id);
+                            setShowModalEliminar(true)
+                          }}>Eliminar</Button>
                       </td>
                       <td>{item.id}</td>
                       <td>{item.nombre}</td>
@@ -147,12 +120,11 @@ function App() {
                   )
                 }
               </tbody>
-            </Table> 
+            </Table>
           </Col></Row>
       </Container>
     </>
   );
 }
 
-export default App;
-*/
+export default ListadoPersona;
